@@ -20,19 +20,25 @@ import {
   mdiPalette,
   mdiPlus,
 } from "@mdi/js";
+import type {
+  HASSDomCurrentTargetEvent,
+  HASSDomEvent,
+} from "../../../../common/dom/fire_event";
 import { fireEvent } from "../../../../common/dom/fire_event";
 import "../../../../components/ha-button";
 import "../../../../components/ha-color-picker";
+import type { HaColorPicker } from "../../../../components/ha-color-picker";
 import "../../../../components/ha-expansion-panel";
 import "../../../../components/ha-form/ha-form";
 import type { SchemaUnion } from "../../../../components/ha-form/types";
 import "../../../../components/ha-icon-button";
+import type { HaIconButton } from "../../../../components/ha-icon-button";
 import "../../../../components/ha-sortable";
 import "../../../../components/ha-svg-icon";
 import "../../../../components/input/ha-input";
 import type { HaInput } from "../../../../components/input/ha-input";
 import { NON_NUMERIC_ATTRIBUTES } from "../../../../data/entity/entity_attributes";
-import type { HomeAssistant } from "../../../../types";
+import type { HomeAssistant, ValueChangedEvent } from "../../../../types";
 import { DEFAULT_MAX, DEFAULT_MIN } from "../../cards/hui-gauge-card";
 import type { GaugeCardConfig, GaugeSegment } from "../../cards/types";
 import {
@@ -338,9 +344,9 @@ export class HuiGaugeCardEditor
     `;
   }
 
-  private _segmentFromChanged(ev: Event): void {
+  private _segmentFromChanged(ev: HASSDomCurrentTargetEvent<HaInput>): void {
     ev.stopPropagation();
-    const target = ev.target as HaInput;
+    const target = ev.currentTarget;
     const index = Number(target.dataset.index);
     const raw = target.value ?? "";
     const parsed = parseFloat(raw);
@@ -359,10 +365,11 @@ export class HuiGaugeCardEditor
     this._updateSegments(segments);
   }
 
-  private _segmentColorChanged(ev: CustomEvent): void {
+  private _segmentColorChanged(
+    ev: ValueChangedEvent<string> & HASSDomCurrentTargetEvent<HaColorPicker>
+  ): void {
     ev.stopPropagation();
-    const target = ev.currentTarget as HTMLElement;
-    const index = Number(target.dataset.index);
+    const index = Number(ev.currentTarget.dataset.index);
     const color = ev.detail.value;
     if (!color) {
       return;
@@ -381,9 +388,9 @@ export class HuiGaugeCardEditor
     this._updateSegments(segments);
   }
 
-  private _segmentLabelChanged(ev: Event): void {
+  private _segmentLabelChanged(ev: HASSDomCurrentTargetEvent<HaInput>): void {
     ev.stopPropagation();
-    const target = ev.target as HaInput;
+    const target = ev.currentTarget;
     const index = Number(target.dataset.index);
     const label = target.value ? target.value.trim() : undefined;
     const segments = this._segments.map((s, i) => {
@@ -405,10 +412,9 @@ export class HuiGaugeCardEditor
     this._updateSegments(segments);
   }
 
-  private _removeSegment(ev: Event): void {
+  private _removeSegment(ev: HASSDomCurrentTargetEvent<HaIconButton>): void {
     ev.stopPropagation();
-    const target = ev.currentTarget as HTMLElement;
-    const index = Number(target.dataset.index);
+    const index = Number(ev.currentTarget.dataset.index);
     const segments = this._segments.filter((_, i) => i !== index);
     this._updateSegments(segments);
   }
@@ -448,7 +454,7 @@ export class HuiGaugeCardEditor
     this._updateSegments(segments);
   }
 
-  private _segmentMoved(ev: CustomEvent): void {
+  private _segmentMoved(ev: HASSDomEvent<HASSDomEvents["item-moved"]>): void {
     ev.stopPropagation();
     const { oldIndex, newIndex } = ev.detail;
     const segments = [...this._segments];
@@ -474,7 +480,7 @@ export class HuiGaugeCardEditor
     fireEvent(this, "config-changed", { config });
   }
 
-  private _valueChanged(ev: CustomEvent): void {
+  private _valueChanged(ev: ValueChangedEvent<GaugeCardConfig>): void {
     const config: GaugeCardConfig = { ...ev.detail.value };
 
     if (this._segments.length > 0) {
