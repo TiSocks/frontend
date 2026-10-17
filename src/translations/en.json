@@ -10220,6 +10220,12 @@
                 "red": "Red",
                 "yellow": "Yellow"
               },
+              "segments": "Segments",
+              "add_segment": "Add segment",
+              "add_default_segments": "Add default segments",
+              "no_segments": "No segments defined",
+              "from": "From",
+              "segment_label": "Label",
               "description": "This card is a basic card that allows visually seeing sensor data."
             },
             "glance": {

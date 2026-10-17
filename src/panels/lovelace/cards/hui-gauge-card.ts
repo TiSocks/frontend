@@ -5,6 +5,7 @@ import { customElement, property, state } from "lit/decorators";
 import { classMap } from "lit/directives/class-map";
 import { ifDefined } from "lit/directives/if-defined";
 import { styleMap } from "lit/directives/style-map";
+import { computeCssColor } from "../../../common/color/compute-color";
 import { applyThemesOnElement } from "../../../common/dom/apply_themes_on_element";
 import { valueFromParts } from "../../../common/entity/value_parts";
 import { isValidEntityId } from "../../../common/entity/valid_entity_id";
@@ -215,7 +216,7 @@ class HuiGaugeCard extends LitElement implements LovelaceCard {
           numberValue >= segment.from &&
           (i + 1 === segments.length || numberValue < segments[i + 1]?.from)
         ) {
-          return segment.color;
+          return severityMap[segment.color] || computeCssColor(segment.color);
         }
       }
       return severityMap.normal;
@@ -259,7 +260,7 @@ class HuiGaugeCard extends LitElement implements LovelaceCard {
     if (segments) {
       return segments.map((segment) => ({
         level: segment?.from,
-        stroke: segment?.color,
+        stroke: severityMap[segment?.color] || computeCssColor(segment?.color),
         label: segment?.label,
       }));
     }
